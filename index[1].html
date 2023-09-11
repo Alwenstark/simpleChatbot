@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" />
+    <style>
+       body {
+            margin: 0;
+            padding: 0;
+            background-color:#E6E6FA;
+            background-size: cover;
+            background-position: center;
+            font-family: sans-serif;
+        }
+
+        .container {
+            position: relative;
+            max-width:900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chat-area { 
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+            border: none;
+            background-color: transparent;
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 0.8em;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            opacity: 0;
+            animation: fade-in 0.3s ease forwards;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            align-items: flex-end;
+        }
+
+        .user-message p, .chatbot-message p {
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+            margin: 5px;
+        }
+
+        .user-message p {
+            background-color: #4caf50;
+            color: #fff;
+            align-self: flex-end;
+        }
+
+        .input-area {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-area input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background-color: #f5f5f5;
+            font-size: 16px;
+            outline: none;
+            margin-right: 10px;
+        }
+
+        .input-area input[type="submit"] {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 200px;
+            width: 300px;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+        }
+
+        .popup h2 {
+            margin-top: 0;
+        }
+
+        .popup .close {
+            position: absolute;
+            top: 10px;
+            right: 10px; 
+            font-size: 20px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .help-button {
+            position: absolute;
+            top: 60px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            right: -314px;
+            border: none;
+            border-radius: 20px;
+            background-color: #f5f5f5;
+            font-size: 24px;
+            color: #333;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                max-width: 400px;
+            }
+
+            .chat-area {
+                height: 200px;
+            }
+
+            .user-message p, .chatbot-message p {
+                max-width: 100%;
+            }
+        }
+        
+        .dark-theme {
+            background-color:#1B1212;
+            color: #f5f5f5;
+        }
+        .dark-theme .container {
+            background-color:#301934;
+        }
+        .theme-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            color: #333;
+            border: none;
+            cursor: pointer;
+        }
+
+        .theme-button i {
+            font-size: 24px;
+        }
+        .clear-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            font-size: 24px;
+            color: #333;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: fixed;
+            top:80px;
+            right: 20px;
+        }
+		.help-button.tooltip {
+            position: absolute;
+            top: 60px;
+            left: -40px;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+			display: block;
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            
+            left: -50px;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .theme-button:hover .tooltip,
+        .clear-button:hover .tooltip,
+		.help-button.tooltip 
+		{
+            display: block;
+        }
+		
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Durgss - The Chatbot</h1>
+    </header>
+    <div>
+        <button class="theme-button" id="themeButton" onclick="toggleTheme()" data-tooltip="Theme">
+            <i id="themeIcon" class="fas fa-moon"></i>
+        </button>
+        <button class="clear-button" onclick="clearConversation()" data-tooltip="Clear Chat">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </div>
+    <div class="container">
+        <div class="chat-area" id="chatArea"></div>
+        <div class="input-area">
+            <input type="text" id="userMessage" placeholder="Type your message" autocomplete="off">
+            <input type="submit" value="Send" onclick="sendMessage()">
+        </div>
+         <button onclick="showPopup()" class="help-button" data-tooltip="Help"><i class="fas fa-question-circle"></i></button>
+        <div id="instructionPopup" class="popup">
+            <span class="close" onclick="hidePopup()">&times;</span>
+            <h2>Instructions</h2>
+            <p>This is the content of the instruction pop-up.</p>
+        </div>
+    </div>
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const userMessageInput = document.getElementById('userMessage');
+
+        function createMessageElement(message, isUserMessage) {
+            const messageContainer = document.createElement('div');
+            messageContainer.className = isUserMessage ? 'message user-message' : 'message chatbot-message';
+
+            const messageText = document.createElement('p');
+            messageText.textContent = message;
+
+            messageContainer.appendChild(messageText);
+
+            return messageContainer;
+        }
+
+        function scrollToBottom() {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function addMessageToChat(message, isUserMessage) {
+            const messageElement = createMessageElement(message, isUserMessage);
+            chatArea.appendChild(messageElement);
+            scrollToBottom();
+            animateMessage(messageElement);
+        }
+
+        function animateMessage(messageElement) {
+            messageElement.style.animationDelay = '0.1s';
+            messageElement.style.animationDuration = '0.3s';
+            messageElement.style.animationFillMode = 'forwards';
+        }
+
+        function sendMessage() {
+            const message = userMessageInput.value.trim();
+            if (message !== '') {
+                addMessageToChat(message, true);
+                userMessageInput.value = '';
+
+                fetch('/chat', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'user_message': message
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const botResponse = data.message;
+                    addMessageToChat(botResponse, false);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function clearConversation() {
+            chatArea.innerHTML = '';
+        }
+
+        function checkForReminder() {
+            fetch('/check_activity')
+            .then(response => response.json())
+            .then(data => {
+                const reminderMessage = data.message;
+                if (reminderMessage !== '') {
+                    addMessageToChat(reminderMessage, false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        setInterval(checkForReminder, 30000); // 10 seconds
+
+        userMessageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentTime = new Date().getHours();
+            let greeting = "";
+            if (currentTime >= 5 && currentTime < 12) {
+                greeting = "Good morning!";
+            } else if (currentTime >= 12 && currentTime < 17) {
+                greeting = "Good afternoon!";
+            } else if (currentTime >= 17 && currentTime < 21) {
+                greeting = "Good evening!";
+            } else {
+                greeting = "Hello!";
+            }
+            addMessageToChat("Durgss: " + greeting + " How can I assist you?", false);
+        });
+
+        function toggleTheme() {
+            const body = document.querySelector('body');
+            const themeButton = document.querySelector('#themeButton');
+            const themeIcon = document.querySelector('#themeIcon');
+
+            body.classList.toggle('dark-theme');
+
+            if (body.classList.contains('dark-theme')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        function showPopup() {
+            document.getElementById('instructionPopup').style.display = 'block';
+        }
+
+        function hidePopup() {
+            document.getElementById('instructionPopup').style.display = 'none';
+        }
+
+        // Add event listeners to show and hide tooltips
+        const buttons = document.querySelectorAll('[data-tooltip]');
+        buttons.forEach((button) => {
+            button.addEventListener('mouseover', showTooltip);
+            button.addEventListener('mouseout', hideTooltip);
+        });
+
+        // Function to show the tooltip
+        function showTooltip(event) {
+            const tooltipText = event.target.getAttribute('data-tooltip');
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = tooltipText;
+            event.target.appendChild(tooltip);
+        }
+
+        // Function to hide the tooltip
+        function hideTooltip(event) {
+            const tooltip = event.target.querySelector('.tooltip');
+            if (tooltip) {
+                event.target.removeChild(tooltip);
+            }
+        }
+    </script>
+</body>
+</html>
